@@ -15,7 +15,7 @@ authors:
 version: "1.0.0"
 date-released: "2026-03-07"
 license: MIT
-DOI: 10.5281/zenodo.18937740
+DOI: "10.5281/zenodo.18937740"
 repository-code: "https://github.com/gkharel/pfas-reach-bracketing-tool"
 url: "https://gkharel.github.io/pfas-reach-bracketing-tool/"
 keywords:
