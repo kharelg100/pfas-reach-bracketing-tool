@@ -1,0 +1,5 @@
+Site ID,Lat,Lon,Reach_group,Bracket_role
+Site_A,32.780,-97.350,Main River,Upstream baseline
+Site_B,32.770,-97.320,Main River,Downstream integrator
+Site_C,32.785,-97.340,Main River,Tributary end-member
+Site_D,32.760,-97.300,Main River,Outlet integrator

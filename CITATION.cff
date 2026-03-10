@@ -1,0 +1,68 @@
+cff-version: 1.2.0
+message: "If you use this software, please cite it as below."
+type: software
+title: "PFAS Reach Bracketing Tool"
+abstract: >-
+  Interactive browser-based tool for machine-readable reach experiment
+  analysis of PFAS in surface water networks with censoring-aware
+  multiple imputation.
+authors:
+  - given-names: Gehendra
+    family-names: Kharel
+    email: g.kharel@tcu.edu
+    affiliation: Texas Christian University
+    orcid: ""
+version: "1.0.0"
+date-released: "2026-03-07"
+license: MIT
+repository-code: "https://github.com/gkharel/pfas-reach-bracketing-tool"
+url: "https://gkharel.github.io/pfas-reach-bracketing-tool/"
+keywords:
+  - PFAS
+  - per- and polyfluoroalkyl substances
+  - surface water
+  - reach bracketing
+  - multiple imputation
+  - censoring
+  - water quality
+  - environmental monitoring
+references:
+  - type: book
+    authors:
+      - family-names: Helsel
+        given-names: Dennis R.
+    title: "Statistics for Censored Environmental Data Using Minitab and R"
+    year: 2012
+    edition: "2nd"
+    publisher:
+      name: John Wiley & Sons
+  - type: book
+    authors:
+      - family-names: Rubin
+        given-names: Donald B.
+    title: "Multiple Imputation for Nonresponse in Surveys"
+    year: 1987
+    publisher:
+      name: John Wiley & Sons
+  - type: article
+    authors:
+      - family-names: Helsel
+        given-names: Dennis R.
+    title: "Fabricating data: How substituting values for nondetects can ruin results"
+    year: 2006
+    journal: Chemosphere
+    volume: 65
+    issue: 11
+    start: 2434
+    end: 2439
+  - type: article
+    authors:
+      - family-names: Woodward
+        given-names: Derik S.
+    title: "Time-of-travel synoptic survey with concurrent streamflow measurement for PFAS stream loading"
+    year: 2024
+    journal: "ACS ES&T Water"
+    volume: 4
+    issue: 10
+    start: 4356
+    end: 4367

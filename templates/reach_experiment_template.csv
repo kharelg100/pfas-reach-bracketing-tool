@@ -1,0 +1,4 @@
+experiment_id,reach_group,experiment_type,downstream_site,upstream_sites,tributary_sites,baseline_sites,all_sites
+R1_TribAdd,Main River,tributary_increment,Site_B,Site_A,Site_C,,Site_A|Site_B|Site_C
+R2_Segment,Main River,source_reach,Site_B,Site_A,,,Site_A|Site_B
+R3_ToOutlet,Main River,downstream_propagation,Site_D,Site_B,,,Site_B|Site_D

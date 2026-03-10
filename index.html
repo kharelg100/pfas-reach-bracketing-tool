@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PFAS Reach Bracketing Tool — TCU</title>
+<meta name="author" content="Dr. Gehendra Kharel, Texas Christian University">
+<meta name="copyright" content="© 2025–2026 Dr. Gehendra Kharel, Texas Christian University. All rights reserved.">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<style>
+:root{--tcu:#4d1979;--tcu2:#6b2fa0;--tcu3:#8b5fbf;--tcuL:#f3edf9;--tcuLL:#faf7fc;--w:#fff;--s50:#f8f9fb;--s100:#f1f3f5;--s200:#e2e5ea;--s300:#c8cdd5;--s400:#8c95a5;--s500:#5f6b7a;--s600:#3f4a5a;--s700:#2d3748;--s800:#1a2332;--g500:#16a34a;--g50:#f0fdf4;--r600:#dc2626;--e600:#059669;--a50:#fffbeb;--a200:#fde68a;--a800:#92400e}
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif;background:var(--s50);color:var(--s800)}
+.hdr{background:linear-gradient(135deg,#3a1160,var(--tcu),#6b2fa0);color:#fff;padding:28px 32px 22px}
+.hdr h1{font-size:26px;font-weight:800;letter-spacing:-.5px}.hdr p{margin-top:8px;font-size:16px;color:#d4bfe8}
+.hdr .contact{margin-top:10px;font-size:14px;color:#e0cff0}
+.hdr .contact a{color:#e8d5f5;text-decoration:none}.hdr .contact a:hover{text-decoration:underline}
+.upanel{padding:20px 32px;background:#fff;border-bottom:2px solid var(--tcuL)}
+.ugrid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;max-width:960px}
+.ubox{border:2px dashed var(--s300);border-radius:10px;padding:16px;text-align:center;background:var(--s50);transition:.2s}
+.ubox.ok{border-color:var(--g500);background:var(--g50)}
+.ulbl{font-size:12px;font-weight:700;color:var(--s700);margin-bottom:4px}
+.udesc{font-size:11px;color:var(--s500);margin-bottom:8px;line-height:1.45}
+.ubtn{display:inline-block;padding:6px 18px;border-radius:8px;background:var(--tcu);color:#fff;font-size:12px;font-weight:600;cursor:pointer;border:none;transition:.15s}
+.ubtn:hover{background:var(--tcu2)}.ubtn.ok{background:var(--g500)}
+.ubox input[type=file]{display:none}
+.uinfo{font-size:10px;color:var(--s400);margin-top:6px}
+.tl{font-size:10px;color:var(--tcu);cursor:pointer;text-decoration:underline;margin-top:4px;display:inline-block}
+.rt{display:inline-block;padding:1px 6px;border-radius:8px;font-size:9px;font-weight:700;margin-left:4px}
+.rq{background:#fee2e2;color:#991b1b}.op{background:var(--tcuL);color:var(--tcu)}
+.ctrls{margin-top:16px;display:flex;align-items:center;gap:12px;flex-wrap:wrap}
+.ctrls label{font-size:12px;color:var(--s500)}
+.ctrls select{margin-left:8px;padding:4px 8px;border-radius:6px;border:1px solid var(--s300);font-size:12px}
+.rbtn{padding:9px 28px;border-radius:8px;border:none;background:var(--tcu);color:#fff;font-size:13px;font-weight:700;cursor:pointer;transition:.15s}
+.rbtn:hover{background:var(--tcu2)}.rbtn:disabled{background:var(--s400);cursor:not-allowed}
+#btn-r{background:#16a34a}#btn-r:hover:not(:disabled){background:#15803d}#btn-r:disabled{background:#a1a1aa}
+.dbtn{padding:8px 20px;border-radius:8px;border:2px solid var(--tcu3);background:var(--tcuLL);color:var(--tcu);font-size:12px;font-weight:700;cursor:pointer}
+.dbtn:hover{background:var(--tcuL)}
+.dlb{padding:5px 14px;border-radius:6px;border:1px solid var(--s300);background:var(--s50);font-size:11px;font-weight:600;color:var(--s600);cursor:pointer}
+.dlb:hover{background:var(--s200)}
+.hint{font-size:11px;color:var(--s400)}
+.results{padding:0 32px 32px}.hidden{display:none}
+.tbar{display:flex;gap:0;margin-top:20px;border-bottom:2px solid var(--s200);flex-wrap:wrap}
+.tbtn{padding:10px 18px;border:none;background:none;font-size:12px;font-weight:500;color:var(--s500);border-bottom:2px solid transparent;margin-bottom:-2px;cursor:pointer;transition:.1s}
+.tbtn.on{font-weight:700;color:var(--tcu);border-bottom-color:var(--tcu)}
+.tc{margin-top:16px}.tc h3{font-size:16px;font-weight:700;color:var(--s800);margin-bottom:12px}
+.tc h4{font-size:13px;font-weight:700;color:var(--s600);margin:0 0 8px}
+table{border-collapse:collapse;width:100%;font-size:12px}
+thead tr{background:var(--tcuL)}
+th{padding:8px 10px;text-align:left;border-bottom:2px solid var(--tcu3);font-weight:700;color:var(--tcu)}
+td{padding:6px 10px;border-bottom:1px solid var(--s200)}
+tbody tr:nth-child(even){background:var(--tcuLL)}
+.mono{font-family:'Cascadia Code','Fira Code',Consolas,monospace}
+.badge{display:inline-block;padding:2px 8px;border-radius:10px;font-size:10px;font-weight:600}
+.b-tr{background:#f3e8ff;color:#7c3aed}.b-cf{background:#e0f2fe;color:#0369a1}.b-ot{background:var(--s100);color:var(--s600)}
+.b-ln{background:var(--tcuL);color:var(--tcu)}.b-un{background:var(--a50);color:var(--a800)}
+.nb{margin-top:12px;padding:12px;border-radius:8px;font-size:11px;line-height:1.5}
+.nb-w{background:var(--a50);border:1px solid var(--a200);color:var(--a800)}
+.nb-i{background:var(--tcuLL);border:1px solid #d8b4fe;color:var(--tcu)}
+.nb-d{background:var(--tcuL);border:1px solid #c084fc;color:#6b21a8}
+.sc{background:#fff;border-radius:10px;border:1px solid var(--s200);padding:16px}
+.sr{display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--s100)}
+.sr .k{color:var(--s500);font-size:12px}.sr .v{font-weight:700;font-size:12px}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+.ga1{display:grid;grid-template-columns:auto 1fr;gap:24px;align-items:start}
+.sy{max-height:500px;overflow-y:auto}.sys{max-height:260px;overflow-y:auto}
+.fb{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.ft{padding:16px 32px;border-top:2px solid var(--tcuL);font-size:11px;color:var(--s400);background:#fff}
+.dban{background:linear-gradient(90deg,var(--tcuLL),var(--tcuL));border:1px solid #c084fc;border-radius:10px;padding:12px 16px;margin-bottom:16px;font-size:12px;color:var(--tcu)}
+.diag-card{background:var(--tcuLL);border:1px solid #e9d5ff;border-radius:8px;padding:12px;margin-bottom:10px}
+.diag-card strong{color:var(--tcu);font-size:12px}.diag-card p{font-size:11px;color:var(--s600);margin-top:4px;line-height:1.45}
+svg text{font-family:'Segoe UI','Helvetica Neue',Arial,sans-serif}
+@media(max-width:768px){.ugrid{grid-template-columns:1fr}.g2,.ga1{grid-template-columns:1fr}.hdr,.upanel,.results,.ft{padding-left:16px;padding-right:16px}}
+</style>
+</head>
+<body>
+<div class="hdr">
+<h1>PFAS Reach Bracketing Tool</h1>
+<p>Machine-readable reach experiment analysis with multiple imputation — runs entirely in your browser</p>
+<div class="contact">Contact: <a href="mailto:g.kharel@tcu.edu">Dr. Gehendra Kharel (g.kharel@tcu.edu)</a> · Texas Christian University<br>&copy; 2025–2026 Dr. Gehendra Kharel. All rights reserved.</div>
+</div>
+<div class="upanel">
+<div class="ugrid">
+<div class="ubox" id="box-pfas"><div class="ulbl">PFAS Results CSV <span class="rt rq">Required</span></div><div class="udesc">One row per analyte per sample. Contains measured concentration, detection status, and reporting limit for each PFAS compound at each site/campaign.</div><button class="ubtn" onclick="document.getElementById('f-pfas').click()">Choose file</button><input type="file" id="f-pfas" accept=".csv" onchange="loadFile(this,'pfas')"><div class="uinfo">Columns: <b>site_id, campaign, analyte_std, result_value, detect_flag, rl</b></div><span class="tl" onclick="dlTmpl('pfas')">⬇ CSV template</span></div>
+<div class="ubox" id="box-sites"><div class="ulbl">Sites Metadata CSV <span class="rt op">Optional</span></div><div class="udesc">One row per site. Adds coordinates for the map, reach groupings, and bracket roles (upstream, tributary, downstream). Auto-detected from PFAS file if omitted.</div><button class="ubtn" onclick="document.getElementById('f-sites').click()">Choose file</button><input type="file" id="f-sites" accept=".csv" onchange="loadFile(this,'sites')"><div class="uinfo">Required: <b>Site ID</b> | Optional: Lat, Lon, Reach_group, Bracket_role</div><span class="tl" onclick="dlTmpl('sites')">⬇ CSV template</span></div>
+<div class="ubox" id="box-reach"><div class="ulbl">Reach Experiment CSV <span class="rt op">Optional</span></div><div class="udesc">One row per bracketing experiment. Defines upstream/tributary/downstream sites. Use pipe "|" for multiple sites. Enables ΔΣPFAS contrasts and mixing fractions.</div><button class="ubtn" onclick="document.getElementById('f-reach').click()">Choose file</button><input type="file" id="f-reach" accept=".csv" onchange="loadFile(this,'reach')"><div class="uinfo">Columns: <b>experiment_id, experiment_type, downstream_site, upstream_sites, tributary_sites, all_sites</b></div><span class="tl" onclick="dlTmpl('reach')">⬇ CSV template</span></div>
+</div>
+<div class="ctrls">
+<label style="font-weight:700;color:var(--tcu);font-size:13px">MI Replicates:<select id="sel-n"><option value="250">250</option><option value="500">500</option><option value="1000" selected>1,000</option><option value="2000">2,000</option><option value="5000">5,000</option><option value="7500">7,500</option><option value="10000">10,000</option></select></label>
+<button class="rbtn" id="btn-r" disabled onclick="run()" style="background:#16a34a">Run Analysis</button>
+<button class="dbtn" onclick="demo()">▶ Run with demo data</button>
+<button class="dlb hidden" id="btn-xl" onclick="toXL()">⬇ Excel workbook</button>
+<button class="rbtn" id="btn-reset" onclick="resetAll()" style="background:#dc2626">⟲ Reset All</button>
+<span class="hint" id="hint">Upload PFAS CSV (minimum) or click "Run with demo data"</span>
+</div></div>
+<div class="results hidden" id="res"><div id="dbs"></div><div class="tbar" id="tbar"></div><div class="tc" id="tc"></div></div>
+<div class="ft">
+<div style="margin-bottom:10px">&copy; 2025–2026 Dr. Gehendra Kharel, Texas Christian University. All rights reserved.<br>PFAS Reach Bracketing Tool · <a href="mailto:g.kharel@tcu.edu" style="color:var(--tcu)">g.kharel@tcu.edu</a> · All computation runs locally in your browser — no data is uploaded anywhere.</div>
+<details style="cursor:pointer"><summary style="font-weight:700;color:var(--tcu);font-size:12px">References &amp; Methodological Citations</summary>
+<div style="margin-top:8px;font-size:11px;color:#3f4a5a;line-height:1.6">
+<b>[1]</b> Helsel, D.R. (2012) <i>Statistics for Censored Environmental Data Using Minitab and R</i>, 2nd ed. John Wiley &amp; Sons. — Foundation for censored data methods (MI, substitution, distributional approaches).<br>
+<b>[2]</b> Rubin, D.B. (1987) <i>Multiple Imputation for Nonresponse in Surveys</i>. John Wiley &amp; Sons. — Theoretical basis for MI framework.<br>
+<b>[3]</b> Lubin, J.H. et al. (2004) Epidemiologic quantification of exposure to environmental pollutants with left-censored data. <i>Environ. Health Perspect.</i> 112(17), 1691–1696. — MI for left-censored environmental data.<br>
+<b>[4]</b> Helsel, D.R. (2006) Fabricating data: How substituting values for nondetects can ruin results. <i>Chemosphere</i> 65(11), 2434–2439. — Limitations of RL/2 and other substitution methods.<br>
+<b>[5]</b> Antweiler, R.C. &amp; Taylor, H.E. (2008) Evaluation of statistical treatments of left-censored environmental data. <i>Environ. Sci. Technol.</i> 42(10), 3732–3738. — Comparison of censoring methods for water quality data.<br>
+<b>[6]</b> US EPA (2024) Method 1633: Analysis of per- and polyfluoroalkyl substances (PFAS) in aqueous, solid, biosolids, and tissue samples by LC-MS/MS. EPA-821-R-24-002.<br>
+<b>[7]</b> Spearman, C. (1904) The proof and measurement of association between two things. <i>Am. J. Psychol.</i> 15(1), 72–101. — Rank correlation used in MI vs RL/2 sensitivity.<br>
+<b>[8]</b> Woodward, D.S. et al. (2024) Time-of-travel synoptic survey with concurrent streamflow measurement for PFAS stream loading. <i>ACS ES&amp;T Water</i> 4(10), 4356–4367. — Synoptic PFAS loading methodology.
+</div></details>
+</div>
+
+<script>
+const D={pfas:null,sites:null,reach:null};let RR=null,AT='summary',ISDEMO=false;
+const TCU='#4d1979',TCU2='#6b2fa0',TCU3='#8b5fbf',TCUL='#f3edf9';
+// ═══ DEMO: 8 sites, 3 reaches, 8 analytes, 2 campaigns ═══
+// Varied non-detect rates to showcase MI vs RL/2 sensitivity differences
+function _d(s,c,a,v,d,r){return{site_id:s,campaign:c,analyte_std:a,result_value:v,detect_flag:d,rl:r};}
+const DP=[
+// ── Campaign 1: 4 shared sites ──
+// Alpha_Up: very clean, only PFOS detected. High RLs → big MI vs RL/2 gap
+_d('Alpha_Up','Campaign 1','PFOS',8.5,1,2),_d('Alpha_Up','Campaign 1','PFHxS',null,0,20),_d('Alpha_Up','Campaign 1','PFOA',null,0,20),_d('Alpha_Up','Campaign 1','PFBS',null,0,25),_d('Alpha_Up','Campaign 1','6:2 FTS',null,0,50),_d('Alpha_Up','Campaign 1','PFHxA',null,0,20),_d('Alpha_Up','Campaign 1','PFBA',null,0,25),_d('Alpha_Up','Campaign 1','PFDA',null,0,10),
+// Alpha_Down: elevated, most detected. Low RLs → small gap
+_d('Alpha_Down','Campaign 1','PFOS',195,1,2),_d('Alpha_Down','Campaign 1','PFHxS',98,1,2),_d('Alpha_Down','Campaign 1','PFOA',30,1,2),_d('Alpha_Down','Campaign 1','PFBS',13,1,5),_d('Alpha_Down','Campaign 1','6:2 FTS',48,1,5),_d('Alpha_Down','Campaign 1','PFHxA',7.5,1,5),_d('Alpha_Down','Campaign 1','PFBA',null,0,10),_d('Alpha_Down','Campaign 1','PFDA',null,0,5),
+// Beta_Up: very clean, only PFOS+PFOA detected. High RLs → big gap
+_d('Beta_Up','Campaign 1','PFOS',7.0,1,2),_d('Beta_Up','Campaign 1','PFHxS',null,0,20),_d('Beta_Up','Campaign 1','PFOA',2.5,1,20),_d('Beta_Up','Campaign 1','PFBS',null,0,25),_d('Beta_Up','Campaign 1','6:2 FTS',null,0,50),_d('Beta_Up','Campaign 1','PFHxA',null,0,20),_d('Beta_Up','Campaign 1','PFBA',null,0,25),_d('Beta_Up','Campaign 1','PFDA',null,0,10),
+// Stem_Out: moderate, 5 detected. Medium RLs → medium gap
+_d('Stem_Out','Campaign 1','PFOS',105,1,2),_d('Stem_Out','Campaign 1','PFHxS',50,1,2),_d('Stem_Out','Campaign 1','PFOA',18,1,2),_d('Stem_Out','Campaign 1','PFBS',6.8,1,5),_d('Stem_Out','Campaign 1','6:2 FTS',26,1,5),_d('Stem_Out','Campaign 1','PFHxA',null,0,15),_d('Stem_Out','Campaign 1','PFBA',null,0,15),_d('Stem_Out','Campaign 1','PFDA',null,0,10),
+// ── Campaign 2: All 8 sites ──
+// Alpha_Up: still very clean
+_d('Alpha_Up','Campaign 2','PFOS',9.2,1,2),_d('Alpha_Up','Campaign 2','PFHxS',null,0,20),_d('Alpha_Up','Campaign 2','PFOA',null,0,20),_d('Alpha_Up','Campaign 2','PFBS',null,0,25),_d('Alpha_Up','Campaign 2','6:2 FTS',null,0,50),_d('Alpha_Up','Campaign 2','PFHxA',null,0,20),_d('Alpha_Up','Campaign 2','PFBA',null,0,25),_d('Alpha_Up','Campaign 2','PFDA',null,0,10),
+// Alpha_Trib: hotspot, ALL detected → zero gap
+_d('Alpha_Trib','Campaign 2','PFOS',3600,1,2),_d('Alpha_Trib','Campaign 2','PFHxS',2500,1,2),_d('Alpha_Trib','Campaign 2','PFOA',680,1,2),_d('Alpha_Trib','Campaign 2','PFBS',350,1,5),_d('Alpha_Trib','Campaign 2','6:2 FTS',2200,1,5),_d('Alpha_Trib','Campaign 2','PFHxA',290,1,5),_d('Alpha_Trib','Campaign 2','PFBA',155,1,5),_d('Alpha_Trib','Campaign 2','PFDA',82,1,2),
+// Alpha_Post: 6 of 8 detected, moderate RLs → small-medium gap
+_d('Alpha_Post','Campaign 2','PFOS',180,1,2),_d('Alpha_Post','Campaign 2','PFHxS',125,1,2),_d('Alpha_Post','Campaign 2','PFOA',36,1,2),_d('Alpha_Post','Campaign 2','PFBS',18,1,5),_d('Alpha_Post','Campaign 2','6:2 FTS',112,1,5),_d('Alpha_Post','Campaign 2','PFHxA',14,1,5),_d('Alpha_Post','Campaign 2','PFBA',null,0,15),_d('Alpha_Post','Campaign 2','PFDA',null,0,10),
+// Alpha_Down: 6 of 8 detected → small gap
+_d('Alpha_Down','Campaign 2','PFOS',168,1,2),_d('Alpha_Down','Campaign 2','PFHxS',85,1,2),_d('Alpha_Down','Campaign 2','PFOA',26,1,2),_d('Alpha_Down','Campaign 2','PFBS',11,1,5),_d('Alpha_Down','Campaign 2','6:2 FTS',44,1,5),_d('Alpha_Down','Campaign 2','PFHxA',6.8,1,5),_d('Alpha_Down','Campaign 2','PFBA',null,0,10),_d('Alpha_Down','Campaign 2','PFDA',null,0,5),
+// Beta_Up: very clean, only PFOS detected. High RLs → biggest gap
+_d('Beta_Up','Campaign 2','PFOS',8.0,1,2),_d('Beta_Up','Campaign 2','PFHxS',null,0,20),_d('Beta_Up','Campaign 2','PFOA',null,0,20),_d('Beta_Up','Campaign 2','PFBS',null,0,25),_d('Beta_Up','Campaign 2','6:2 FTS',null,0,50),_d('Beta_Up','Campaign 2','PFHxA',null,0,20),_d('Beta_Up','Campaign 2','PFBA',null,0,25),_d('Beta_Up','Campaign 2','PFDA',null,0,10),
+// Beta_Down: 3 of 8 detected, high RLs → large gap
+_d('Beta_Down','Campaign 2','PFOS',19,1,2),_d('Beta_Down','Campaign 2','PFHxS',5.5,1,20),_d('Beta_Down','Campaign 2','PFOA',4.8,1,20),_d('Beta_Down','Campaign 2','PFBS',null,0,25),_d('Beta_Down','Campaign 2','6:2 FTS',null,0,50),_d('Beta_Down','Campaign 2','PFHxA',null,0,20),_d('Beta_Down','Campaign 2','PFBA',null,0,25),_d('Beta_Down','Campaign 2','PFDA',null,0,10),
+// Stem_Confl: 5 of 8 detected, medium RLs → medium gap
+_d('Stem_Confl','Campaign 2','PFOS',115,1,2),_d('Stem_Confl','Campaign 2','PFHxS',52,1,2),_d('Stem_Confl','Campaign 2','PFOA',18,1,2),_d('Stem_Confl','Campaign 2','PFBS',7.5,1,5),_d('Stem_Confl','Campaign 2','6:2 FTS',28,1,5),_d('Stem_Confl','Campaign 2','PFHxA',null,0,15),_d('Stem_Confl','Campaign 2','PFBA',null,0,15),_d('Stem_Confl','Campaign 2','PFDA',null,0,10),
+// Stem_Out: 5 of 8 detected, medium RLs → medium gap
+_d('Stem_Out','Campaign 2','PFOS',98,1,2),_d('Stem_Out','Campaign 2','PFHxS',45,1,2),_d('Stem_Out','Campaign 2','PFOA',16,1,2),_d('Stem_Out','Campaign 2','PFBS',6.2,1,5),_d('Stem_Out','Campaign 2','6:2 FTS',22,1,5),_d('Stem_Out','Campaign 2','PFHxA',null,0,15),_d('Stem_Out','Campaign 2','PFBA',null,0,15),_d('Stem_Out','Campaign 2','PFDA',null,0,10)
+];
+const DS=[
+{'Site ID':'Alpha_Up',Lat:32.805,Lon:-97.375,Reach_group:'Reach Alpha',Bracket_role:'Upstream baseline'},
+{'Site ID':'Alpha_Trib',Lat:32.815,Lon:-97.355,Reach_group:'Reach Alpha',Bracket_role:'Tributary end-member'},
+{'Site ID':'Alpha_Post',Lat:32.798,Lon:-97.340,Reach_group:'Reach Alpha',Bracket_role:'Post-confluence'},
+{'Site ID':'Alpha_Down',Lat:32.790,Lon:-97.318,Reach_group:'Reach Alpha',Bracket_role:'Downstream integrator'},
+{'Site ID':'Beta_Up',Lat:32.778,Lon:-97.380,Reach_group:'Reach Beta',Bracket_role:'Upstream baseline'},
+{'Site ID':'Beta_Down',Lat:32.772,Lon:-97.348,Reach_group:'Reach Beta',Bracket_role:'Downstream integrator'},
+{'Site ID':'Stem_Confl',Lat:32.766,Lon:-97.308,Reach_group:'Mainstem',Bracket_role:'Confluence integrator'},
+{'Site ID':'Stem_Out',Lat:32.755,Lon:-97.280,Reach_group:'Mainstem',Bracket_role:'Outlet integrator'}
+];
+const DR=[
+{experiment_id:'A1_TribIncrement',reach_group:'Reach Alpha',experiment_type:'tributary_increment',downstream_site:'Alpha_Post',upstream_sites:'Alpha_Up',tributary_sites:'Alpha_Trib',baseline_sites:'',all_sites:'Alpha_Up|Alpha_Trib|Alpha_Post'},
+{experiment_id:'A2_SourceReach',reach_group:'Reach Alpha',experiment_type:'source_reach',downstream_site:'Alpha_Down',upstream_sites:'Alpha_Post',tributary_sites:'',baseline_sites:'Alpha_Up',all_sites:'Alpha_Up|Alpha_Post|Alpha_Down'},
+{experiment_id:'B1_Segment',reach_group:'Reach Beta',experiment_type:'source_reach',downstream_site:'Beta_Down',upstream_sites:'Beta_Up',tributary_sites:'',baseline_sites:'',all_sites:'Beta_Up|Beta_Down'},
+{experiment_id:'S1_Confluence',reach_group:'Mainstem',experiment_type:'confluence_mix',downstream_site:'Stem_Confl',upstream_sites:'Alpha_Down|Beta_Down',tributary_sites:'',baseline_sites:'',all_sites:'Alpha_Down|Beta_Down|Stem_Confl'},
+{experiment_id:'S2_ToOutlet',reach_group:'Mainstem',experiment_type:'downstream_propagation',downstream_site:'Stem_Out',upstream_sites:'Stem_Confl',tributary_sites:'',baseline_sites:'',all_sites:'Stem_Confl|Stem_Out'}
+];
+function demo(){D.pfas=DP;D.sites=DS;D.reach=DR;ISDEMO=true;['pfas','sites','reach'].forEach(k=>{const b=document.getElementById('box-'+k);b.classList.add('ok');b.querySelector('.ubtn').textContent='\u2713 Demo';b.querySelector('.ubtn').classList.add('ok');b.querySelector('.uinfo').textContent=D[k].length+' rows (demo)';});document.getElementById('btn-r').disabled=false;document.getElementById('hint').textContent='';run();}
+function resetAll(){D.pfas=null;D.sites=null;D.reach=null;RR=null;AT='summary';ISDEMO=false;['pfas','sites','reach'].forEach(k=>{const b=document.getElementById('box-'+k);b.classList.remove('ok');b.querySelector('.ubtn').textContent='Choose file';b.querySelector('.ubtn').classList.remove('ok');var inp=document.getElementById('f-'+k);if(inp)inp.value='';});document.getElementById('box-pfas').querySelector('.uinfo').innerHTML='Columns: <b>site_id, campaign, analyte_std, result_value, detect_flag, rl</b>';document.getElementById('box-sites').querySelector('.uinfo').innerHTML='Required: <b>Site ID</b> | Optional: Lat, Lon, Reach_group, Bracket_role';document.getElementById('box-reach').querySelector('.uinfo').innerHTML='Columns: <b>experiment_id, experiment_type, downstream_site, upstream_sites, tributary_sites, all_sites</b>';document.getElementById('btn-r').disabled=true;document.getElementById('btn-xl').classList.add('hidden');document.getElementById('res').classList.add('hidden');document.getElementById('hint').textContent='Upload PFAS CSV (minimum) or click "Run with demo data"';document.getElementById('dbs').innerHTML='';document.getElementById('tbar').innerHTML='';document.getElementById('tc').innerHTML='';}
+function dlTmpl(t){let c='';if(t==='pfas')c='site_id,campaign,analyte_std,result_value,detect_flag,rl\nSite_A,Campaign 1,PFOS,22.5,1,2.0\nSite_A,Campaign 1,PFHxS,,0,2.0\nSite_B,Campaign 1,PFOS,185.0,1,2.0';else if(t==='sites')c='Site ID,Lat,Lon,Reach_group,Bracket_role\nSite_A,32.780,-97.350,Main River,Upstream baseline\nSite_B,32.770,-97.320,Main River,Downstream integrator';else c='experiment_id,reach_group,experiment_type,downstream_site,upstream_sites,tributary_sites,baseline_sites,all_sites\nR1_TribAdd,Main River,tributary_increment,Site_B,Site_A,Site_C,,Site_A|Site_B|Site_C';const b=new Blob([c],{type:'text/csv'});const a=document.createElement('a');a.download=t+'_template.csv';a.href=URL.createObjectURL(b);a.click();}
+function loadFile(i,k){const f=i.files[0];if(!f)return;ISDEMO=false;const r=new FileReader();r.onload=function(e){D[k]=Papa.parse(e.target.result.trim(),{header:true,skipEmptyLines:true,dynamicTyping:true}).data;const b=document.getElementById('box-'+k);b.classList.add('ok');b.querySelector('.ubtn').textContent='\u2713 '+f.name;b.querySelector('.ubtn').classList.add('ok');b.querySelector('.uinfo').textContent=D[k].length+' rows';chk();};r.readAsText(f);}
+function chk(){document.getElementById('btn-r').disabled=!D.pfas;document.getElementById('hint').textContent=D.pfas?'Ready':'Upload PFAS CSV to proceed';}
+// MATH
+function m32(s){return function(){s|=0;s=s+0x6D2B79F5|0;let t=Math.imul(s^s>>>15,1|s);t=t+Math.imul(t^t>>>7,61|t)^t;return((t^t>>>14)>>>0)/4294967296};}
+function nI(p){if(p<=0)return-Infinity;if(p>=1)return Infinity;if(p<.5)return-nI(1-p);const t=Math.sqrt(-2*Math.log(1-p));return t-(2.515517+.802853*t+.010328*t*t)/(1+1.432788*t+.189269*t*t+.001308*t*t*t);}
+function nC(x){const s=x<0?-1:1;x=Math.abs(x)/Math.sqrt(2);const t=1/(1+.3275911*x);return .5*(1+s*(1-(((((1.061405429*t-1.453152027)*t)+1.421413741)*t-.284496736)*t+.254829592)*t*Math.exp(-x*x)));}
+function qt(a,q){const s=[...a].sort((a,b)=>a-b),p=(s.length-1)*q,l=Math.floor(p),h=Math.ceil(p);return l===h?s[l]:s[l]+(s[h]-s[l])*(p-l);}
+function md(a){return qt(a,.5);}function F(v,d=1){return v==null||isNaN(v)?'':v.toFixed(d);}
+function FI(m,l,h,d=1){return isNaN(m)?'':`${F(m,d)} [${F(l,d)}, ${F(h,d)}]`;}
+function sp(s){if(!s||String(s).trim()==='')return[];return String(s).split('|').map(x=>x.trim()).filter(Boolean);}
+function spR(a,b){const n=a.length;function rk(arr){const idx=arr.map((v,i)=>({v,i})).sort((a,b)=>a.v-b.v);const r=new Array(n);idx.forEach((x,ri)=>{r[x.i]=ri+1});return r;}const ra=rk(a),rb=rk(b);let d2=0;for(let i=0;i<n;i++)d2+=(ra[i]-rb[i])**2;return 1-6*d2/(n*(n*n-1));}
+function rc(r){if(!r)return'#5f6b7a';r=r.toLowerCase();if(r.includes('upstream')||r.includes('pre-source')||r.includes('baseline'))return'#2563eb';if(r.includes('tributary'))return TCU;if(r.includes('downstream')||r.includes('integrator')||r.includes('outlet')||r.includes('confluence')||r.includes('post-'))return'#ea580c';return'#5f6b7a';}
+function autoS(p){return[...new Set(p.map(r=>r.site_id))].sort().map(id=>({'Site ID':id,Lat:null,Lon:null,Reach_group:'',Bracket_role:''}));}
+function roleLabel(r){if(!r)return'';r=r.toLowerCase();if(r.includes('upstream')||r.includes('baseline'))return'Upstream';if(r.includes('tributary'))return'Tributary';if(r.includes('post-confluence')||r.includes('post-conf'))return'Post-confluence';if(r.includes('downstream'))return'Downstream';if(r.includes('outlet'))return'Outlet';if(r.includes('integrator'))return'Integrator';return'';}
+// MI ENGINE
+function MI(pf,si,nR,seed){const rng=m32(seed),al=new Set(si.map(r=>r['Site ID'])),fi=pf.filter(r=>al.has(r.site_id)),an=[...new Set(fi.map(r=>r.analyte_std))].sort(),iK=r=>`${r.campaign}|||${r.site_id}`,sK=[...new Set(fi.map(iK))],sI=sK.map(k=>{const[c,s]=k.split('|||');return{campaign:c,site_id:s}}),nS=sK.length,nA=an.length,kI=Object.fromEntries(sK.map((k,i)=>[k,i])),aI=Object.fromEntries(an.map((a,i)=>[a,i]));
+const vl=Array.from({length:nS},()=>new Float64Array(nA).fill(NaN)),rl=Array.from({length:nS},()=>new Float64Array(nA).fill(NaN)),dt=Array.from({length:nS},()=>new Uint8Array(nA));
+for(const r of fi){const si2=kI[iK(r)],ai=aI[r.analyte_std];if(si2==null||ai==null)continue;vl[si2][ai]=r.result_value!=null?Number(r.result_value):NaN;rl[si2][ai]=r.rl!=null?Number(r.rl):NaN;dt[si2][ai]=Number(r.detect_flag)===1?1:0;}
+const pr=an.map((a,ai)=>{const dv=[];for(let si2=0;si2<nS;si2++)if(dt[si2][ai]===1&&isFinite(vl[si2][ai])&&vl[si2][ai]>0)dv.push(vl[si2][ai]);if(dv.length>=2){const logs=dv.map(Math.log),mu=logs.reduce((a,b)=>a+b,0)/logs.length;let sg=Math.sqrt(logs.reduce((a,b)=>a+(b-mu)**2,0)/(logs.length-1));if(sg<1e-6)sg=.5;return{mu,sigma:sg,mode:'lognorm',nDet:dv.length};}return{mu:null,sigma:null,mode:'uniform',nDet:dv.length};});
+const tot=Array.from({length:nS},()=>new Float64Array(nR));
+for(let ai=0;ai<nA;ai++){const p=pr[ai];for(let si2=0;si2<nS;si2++){const isDet=dt[si2][ai]===1&&isFinite(vl[si2][ai]);if(isDet){for(let r2=0;r2<nR;r2++)tot[si2][r2]+=vl[si2][ai];}else{const rli=rl[si2][ai];if(!isFinite(rli)||rli<=0)continue;if(p.mode==='lognorm'){const lu=Math.log(rli),pc=Math.max(nC((lu-p.mu)/p.sigma),1e-10);for(let r2=0;r2<nR;r2++)tot[si2][r2]+=Math.max(0,Math.min(Math.exp(p.mu+p.sigma*nI(rng()*pc)),rli));}else{for(let r2=0;r2<nR;r2++)tot[si2][r2]+=rng()*rli;}}}}
+const r2t=new Float64Array(nS),dO=new Float64Array(nS);for(let ai=0;ai<nA;ai++)for(let si2=0;si2<nS;si2++){const isDet=dt[si2][ai]===1&&isFinite(vl[si2][ai]);if(isDet){r2t[si2]+=vl[si2][ai];dO[si2]+=vl[si2][ai];}else{const rli=rl[si2][ai];if(isFinite(rli)&&rli>0)r2t[si2]+=rli/2;}}
+const ss=sI.map((info,si2)=>{const a=Array.from(tot[si2]);return{...info,median:md(a),lo:qt(a,.025),hi:qt(a,.975),dist:a,rl2:r2t[si2],detectOnly:dO[si2]};});
+const Ns=[250,500,1000,2000,5000].filter(N=>N<nR),cv=Ns.map(N=>{let dM=0,dL=0,dH=0;for(let si2=0;si2<nS;si2++){const sub=Array.from(tot[si2].slice(0,N));dM=Math.max(dM,Math.abs(md(sub)-ss[si2].median));dL=Math.max(dL,Math.abs(qt(sub,.025)-ss[si2].lo));dH=Math.max(dH,Math.abs(qt(sub,.975)-ss[si2].hi));}return{N,maxDiffMed:dM,maxDiffLo:dL,maxDiffHi:dH};});
+return{siteStats:ss,params:pr,analytes:an,nSamples:nS,nAnalytes:nA,totals:tot,convergence:cv};}
+// REACH
+function AR(reach,ss){const lk={};for(const s of ss)lk[`${s.campaign}|||${s.site_id}`]=s;const gd=(c,s)=>lk[`${c}|||${s}`]?.dist;const res=[];
+for(const r of reach){const ds=r.downstream_site,ups=sp(r.upstream_sites),trs=sp(r.tributary_sites),all=sp(r.all_sites);
+for(const camp of['Campaign 1','Campaign 2']){const have=new Set(ss.filter(s=>s.campaign===camp).map(s=>s.site_id));if(!all.every(s=>have.has(s)))continue;const dd=gd(camp,ds);if(!dd)continue;
+let dTxt='',diag='',dM=NaN,dL=NaN,dH=NaN,fM=NaN;const et=r.experiment_type;
+if(et==='tributary_increment'||et==='downstream_propagation'){const up=ups[0],ud=gd(camp,up);if(ud){const d=dd.map((v,i)=>v-ud[i]);dM=md(d);dL=qt(d,.025);dH=qt(d,.975);dTxt=FI(dM,dL,dH);}if(trs.length>0){const td=gd(camp,trs[0]),ud2=gd(camp,up);if(td&&ud2){const f=dd.map((v,i)=>{const dn=td[i]-ud2[i];return dn!==0?(v-ud2[i])/dn:NaN;});const fc=f.map(v=>Math.max(0,Math.min(1,v))),vf=f.filter(v=>v>=0&&v<=1).length/f.length;fM=md(fc.filter(isFinite));diag=`f\u2248${F(fM,3)} (valid ${F(vf,2)})`;}}}
+else if(et==='source_reach'){const up=ups[0],ud=gd(camp,up);if(ud){const d=dd.map((v,i)=>v-ud[i]);dM=md(d);dL=qt(d,.025);dH=qt(d,.975);dTxt=FI(dM,dL,dH);diag=`segment: ${ds}\u2013${up}`;}}
+else if(et==='confluence_mix'&&ups.length>=2){const[u1,u2]=[gd(camp,ups[0]),gd(camp,ups[1])];if(u1&&u2){const out=dd.map((v,i)=>(v<Math.min(u1[i],u2[i])||v>Math.max(u1[i],u2[i]))?1:0);const op=out.reduce((a,b)=>a+b,0)/out.length;const f=dd.map((v,i)=>{const hi=Math.max(u1[i],u2[i]),lo=Math.min(u1[i],u2[i]);return hi-lo!==0?(v-lo)/(hi-lo):NaN;});fM=md(f.filter(isFinite).map(v=>Math.max(0,Math.min(1,v))));diag=`outside-range=${F(op,2)}; f\u2248${F(fM,3)}`;}}
+res.push({experiment_id:r.experiment_id,reach_group:r.reach_group,experiment_type:et,campaign:camp,delta:dTxt,deltaMed:dM,deltaLo:dL,deltaHi:dH,fMed:fM,diagnostic:diag});}}return res;}
+// RUN
+function run(){const btn=document.getElementById('btn-r');btn.textContent='Running\u2026';btn.disabled=true;setTimeout(()=>{try{const nR=parseInt(document.getElementById('sel-n').value);const si=D.sites||autoS(D.pfas);const mi=MI(D.pfas,si,nR,20260227);const re=D.reach?AR(D.reach,mi.siteStats):[];RR={mi,re,nR,si,hr:!!D.reach};document.getElementById('res').classList.remove('hidden');document.getElementById('btn-xl').classList.remove('hidden');document.getElementById('hint').textContent='';document.getElementById('dbs').innerHTML=ISDEMO?'<div class="dban"><strong>\ud83d\udcca Demo mode</strong> \u2014 Running on built-in example data (8 sites, 8 analytes, 2 campaigns). Upload your own CSVs to analyze your data.</div>':'';bT();sT('summary');}catch(err){alert('Error: '+err.message);console.error(err);}btn.textContent='Run Analysis';btn.disabled=false;},50);}
+// TABS
+function gT(){const t=[{id:'summary',label:'Site Summary'}];if(RR.hr)t.push({id:'reaches',label:'Reach Experiments'});if(RR.si.some(s=>s.Lat&&s.Lon))t.push({id:'network',label:'Network Map'});t.push({id:'figures',label:'Figures'},{id:'sensitivity',label:'RL/2 Comparison'},{id:'diagnostics',label:'Diagnostics'});return t;}
+function bT(){const tabs=gT(),bar=document.getElementById('tbar');bar.innerHTML='';tabs.forEach(t=>{const b=document.createElement('button');b.className='tbtn'+(t.id===AT?' on':'');b.textContent=t.label;b.onclick=()=>sT(t.id);bar.appendChild(b);});}
+function sT(id){AT=id;document.querySelectorAll('.tbtn').forEach(b=>{const t=gT().find(t=>t.label===b.textContent);b.classList.toggle('on',t&&t.id===id);});const c=document.getElementById('tc');({summary:rS,reaches:rR,network:rN,figures:rF,sensitivity:rSn,diagnostics:rD})[id]?.(c);}
+// RENDER SUMMARY
+function rS(el){const ss=[...RR.mi.siteStats].sort((a,b)=>b.median-a.median);let h='<h3>\u03a3PFAS totals by site</h3><div style="overflow-x:auto"><table><thead><tr>';['Site','Reach','Role','Campaign','\u03a3PFAS (ng/L)','95% Imputation Interval','RL/2'].forEach(x=>h+=`<th>${x}</th>`);h+='</tr></thead><tbody>';ss.forEach(s=>{const m=RR.si.find(x=>x['Site ID']===s.site_id),role=m?.Bracket_role||'';h+=`<tr><td style="font-weight:700;color:${rc(role)}">${s.site_id}</td><td style="color:var(--s500);font-size:11px">${m?.Reach_group||''}</td><td style="color:var(--s500);font-size:10px">${role}</td><td>${s.campaign}</td><td class="mono" style="font-weight:700">${F(s.median)}</td><td class="mono" style="color:var(--s500);font-size:11px">[${F(s.lo)}, ${F(s.hi)}]</td><td class="mono" style="color:var(--s400)">${F(s.rl2)}</td></tr>`;});h+='</tbody></table></div>';h+=`<p class="hint" style="margin-top:8px">${RR.mi.nSamples} samples \u00d7 ${RR.mi.nAnalytes} analytes \u00d7 ${RR.nR.toLocaleString()} MI replicates</p>`;if(!RR.hr)h+=`<div class="nb nb-d" style="margin-top:12px">\ud83d\udca1 <b>Tip:</b> Upload a Reach Experiment CSV to unlock ΔΣPFAS contrasts, mixing fractions (f<sub>trib</sub>), and the Reach Experiments tab.</div>`;el.innerHTML=h;}
+// RENDER REACHES
+function rR(el){let h='<h3>Reach experiment contrasts</h3><div style="overflow-x:auto"><table><thead><tr>';['Experiment','Reach','Type','Campaign','\u0394\u03a3PFAS (ng/L)','Diagnostic'].forEach(x=>h+=`<th>${x}</th>`);h+='</tr></thead><tbody>';RR.re.forEach(r=>{const bc=r.experiment_type==='tributary_increment'?'b-tr':r.experiment_type==='confluence_mix'?'b-cf':'b-ot';h+=`<tr><td style="font-weight:600">${r.experiment_id}</td><td style="color:var(--s500);font-size:11px">${r.reach_group}</td><td><span class="badge ${bc}">${r.experiment_type}</span></td><td>${r.campaign}</td><td class="mono" style="font-weight:600">${r.delta}</td><td class="mono" style="font-size:11px;color:${TCU}">${r.diagnostic}</td></tr>`;});h+='</tbody></table></div>';h+=`<div class="nb nb-w"><b>f<sub>trib</sub></b> = (C<sub>down</sub> \u2212 C<sub>up</sub>) / (C<sub>trib</sub> \u2212 C<sub>up</sub>), truncated to [0,1]. Estimates the tributary flow fraction needed to explain the downstream concentration under conservative mixing. <b>"Valid"</b> = fraction of MI replicates where f naturally falls in [0,1]. Does not replace discharge-based load calculations (Woodward et al. 2024 [8]).</div>`;el.innerHTML=h;}
+// SVG DOWNLOAD HELPER
+function dlSvg(id,fn){const s=document.getElementById(id);if(!s)return;const bl=new Blob(['<?xml version="1.0" encoding="UTF-8"?>\n'+new XMLSerializer().serializeToString(s)],{type:'image/svg+xml'});const a=document.createElement('a');a.download=fn;a.href=URL.createObjectURL(bl);a.click();}
+// NETWORK MAP
+function rN(el){
+const sm={};RR.mi.siteStats.forEach(s=>{if(!sm[s.site_id])sm[s.site_id]={};sm[s.site_id][s.campaign]=s;});
+const si=RR.si.filter(s=>s.Lat&&s.Lon);if(!si.length){el.innerHTML='<p>No coordinates</p>';return;}
+const lats=si.map(s=>s.Lat),lons=si.map(s=>s.Lon),pd=.01;
+const nLa=Math.min(...lats)-pd,xLa=Math.max(...lats)+pd,nLo=Math.min(...lons)-pd,xLo=Math.max(...lons)+pd;
+const W=750,H=520,ml=50,mr=50,mt=50,mb=80;
+const tX=lo=>ml+((lo-nLo)/(xLo-nLo))*(W-ml-mr);
+const tY=la=>mt+((xLa-la)/(xLa-nLa))*(H-mt-mb);
+const ms=RR.mi.siteStats.filter(s=>s.median>0).map(s=>s.median),mc=Math.min(...ms,10),xc=Math.max(...ms,100);
+function cc(v){if(!v||v<=0)return'#ccc';const t=Math.max(0,Math.min(1,(Math.log10(v)-Math.log10(mc))/(Math.log10(xc)-Math.log10(mc))));if(t<.3)return`rgb(${~~(43+t/.3*60)},${~~(100+t/.3*50)},${~~(180-t/.3*20)})`;if(t<.65)return`rgb(${~~(103+(t-.3)/.35*140)},${~~(150-(t-.3)/.35*60)},${~~(160-(t-.3)/.35*120)})`;return`rgb(${~~(243-(t-.65)/.35*120)},${~~(90-(t-.65)/.35*70)},${~~(40-(t-.65)/.35*30)})`;}
+function cr(v){if(!v||v<=0)return 8;return 8+Math.max(0,Math.min(1,(Math.log10(v)-Math.log10(mc))/(Math.log10(xc)-Math.log10(mc))))*16;}
+let svg=`<svg id="nsv" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-height:530px;border-radius:8px"><rect width="${W}" height="${H}" fill="#faf9fc"/>`;
+// Title
+svg+=`<text x="${W/2}" y="28" text-anchor="middle" font-size="16" font-weight="bold" fill="${TCU}">Sampling Network — \u03a3PFAS Concentration</text>`;
+// Edges with arrows
+if(D.reach)D.reach.forEach(r=>{const dm=si.find(s=>s['Site ID']===r.downstream_site);if(!dm)return;
+sp(r.upstream_sites).forEach(u=>{const m=si.find(s=>s['Site ID']===u);if(m)svg+=`<line x1="${tX(m.Lon)}" y1="${tY(m.Lat)}" x2="${tX(dm.Lon)}" y2="${tY(dm.Lat)}" stroke="${TCU3}" stroke-width="2.5" opacity=".45" stroke-linecap="round"/>`;});
+sp(r.tributary_sites).forEach(u=>{const m=si.find(s=>s['Site ID']===u);if(m)svg+=`<line x1="${tX(m.Lon)}" y1="${tY(m.Lat)}" x2="${tX(dm.Lon)}" y2="${tY(dm.Lat)}" stroke="${TCU}" stroke-width="2" stroke-dasharray="6,4" opacity=".5" stroke-linecap="round"/>`;});});
+// Nodes
+si.forEach(s=>{const x=tX(s.Lon),y=tY(s.Lat),st=sm[s['Site ID']],b=st?.['Campaign 2']||st?.['Campaign 1'],med=b?.median,r=cr(med),rl=roleLabel(s.Bracket_role);
+svg+=`<circle cx="${x}" cy="${y}" r="${r+3}" fill="white" opacity=".95"/>`;
+svg+=`<circle cx="${x}" cy="${y}" r="${r}" fill="${cc(med)}" stroke="white" stroke-width="2"/>`;
+svg+=`<text x="${x}" y="${y-r-8}" text-anchor="middle" font-size="13" font-weight="bold" fill="${TCU}">${s['Site ID']}</text>`;
+if(rl)svg+=`<text x="${x}" y="${y-r-22}" text-anchor="middle" font-size="10" fill="${rc(s.Bracket_role)}" font-style="italic">${rl}</text>`;
+if(med!=null)svg+=`<text x="${x}" y="${y+r+16}" text-anchor="middle" font-size="11" font-weight="bold" fill="#3f4a5a">${med<1000?F(med,0):F(med/1000,1)+'k'} ng/L</text>`;});
+// Legend
+const lx=W-200,ly=H-72;
+svg+=`<rect x="${lx-10}" y="${ly-10}" width="200" height="68" rx="6" fill="white" stroke="${TCU3}" stroke-width=".7" opacity=".92"/>`;
+svg+=`<line x1="${lx}" y1="${ly+5}" x2="${lx+22}" y2="${ly+5}" stroke="${TCU3}" stroke-width="2.5" opacity=".5"/>`;
+svg+=`<text x="${lx+28}" y="${ly+9}" font-size="11" fill="#3f4a5a">Mainstem connection</text>`;
+svg+=`<line x1="${lx}" y1="${ly+24}" x2="${lx+22}" y2="${ly+24}" stroke="${TCU}" stroke-width="2" stroke-dasharray="5,3" opacity=".6"/>`;
+svg+=`<text x="${lx+28}" y="${ly+28}" font-size="11" fill="#3f4a5a">Tributary connection</text>`;
+svg+=`<circle cx="${lx+11}" cy="${ly+45}" r="6" fill="${cc(xc)}" stroke="white" stroke-width="1"/>`;
+svg+=`<text x="${lx+28}" y="${ly+49}" font-size="11" fill="#3f4a5a">Size/color = concentration</text>`;
+svg+=`</svg>`;
+el.innerHTML=`<div class="fb"><h3>Network Map</h3><button class="dlb" onclick="dlSvg('nsv','network_map.svg')">⬇ SVG</button></div>${svg}`;}
+// BAR CHART (SVG)
+function rF(el){
+const sorted=[...RR.mi.siteStats].sort((a,b)=>b.median-a.median),n=sorted.length;
+const W=Math.max(750,n*52+120),H=480,ml=70,mr=30,mt=50,mb=100,pw=W-ml-mr,ph=H-mt-mb;
+const mx=Math.max(...sorted.map(s=>s.hi))*1.15,mn=Math.max(.5,Math.min(...sorted.filter(s=>s.lo>0).map(s=>s.lo))*.5);
+const uL=mx/mn>50;
+function tY(v){return uL?mt+ph*(1-(Math.log10(Math.max(v,mn))-Math.log10(mn))/(Math.log10(mx)-Math.log10(mn))):mt+ph*(1-v/mx);}
+const bw=Math.min(pw/n*.65,32),gap=pw/n;
+let svg=`<svg id="bsv" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-height:500px;border-radius:8px"><rect width="${W}" height="${H}" fill="white"/>`;
+// Title
+svg+=`<text x="${W/2}" y="30" text-anchor="middle" font-size="16" font-weight="bold" fill="${TCU}">\u03a3PFAS by Site (MI Median + 95% Imputation Interval)</text>`;
+// Y axis
+const ticks=uL?[1,10,100,1000,10000,100000].filter(v=>v>=mn&&v<=mx):[0,mx*.25,mx*.5,mx*.75,mx];
+ticks.forEach(v=>{const y=tY(v);svg+=`<line x1="${ml}" y1="${y}" x2="${W-mr}" y2="${y}" stroke="#e2e5ea" stroke-width=".7"/>`;svg+=`<text x="${ml-8}" y="${y+4}" text-anchor="end" font-size="11" fill="#5f6b7a">${v>=1000?(v/1000|0)+'k':v.toFixed(0)}</text>`;});
+svg+=`<text x="18" y="${mt+ph/2}" text-anchor="middle" font-size="12" fill="#5f6b7a" transform="rotate(-90,18,${mt+ph/2})">ng/L${uL?' (log scale)':''}</text>`;
+// Bars
+for(let i=0;i<n;i++){const s=sorted[i],x=ml+i*gap+gap/2,yM=tY(s.median),yL=tY(s.lo),yH=tY(s.hi),yB=uL?tY(mn):tY(0);
+const m=RR.si.find(d=>d['Site ID']===s.site_id),rl=(m?.Bracket_role||'');let col=TCU3;if(rl.toLowerCase().includes('upstream')||rl.toLowerCase().includes('baseline'))col='#3b82f6';else if(rl.toLowerCase().includes('tributary'))col=TCU;else if(rl.toLowerCase().includes('downstream')||rl.toLowerCase().includes('integrator')||rl.toLowerCase().includes('outlet')||rl.toLowerCase().includes('post-'))col='#ea580c';
+svg+=`<line x1="${x}" y1="${yL}" x2="${x}" y2="${yH}" stroke="#8c95a5" stroke-width="1.5"/>`;
+svg+=`<line x1="${x-4}" y1="${yL}" x2="${x+4}" y2="${yL}" stroke="#8c95a5" stroke-width="1.5"/>`;
+svg+=`<line x1="${x-4}" y1="${yH}" x2="${x+4}" y2="${yH}" stroke="#8c95a5" stroke-width="1.5"/>`;
+svg+=`<rect x="${x-bw/2}" y="${yM}" width="${bw}" height="${Math.max(0,yB-yM)}" fill="${col}" opacity=".75" rx="2"/>`;
+svg+=`<text x="${x}" y="${H-mb+14}" text-anchor="end" font-size="11" font-weight="bold" fill="#2d3748" transform="rotate(-40,${x},${H-mb+14})">${s.site_id} (${s.campaign.replace('Campaign ','C')})</text>`;}
+// Legend
+const lx=W-200,ly=mt+10;
+svg+=`<rect x="${lx}" y="${ly}" width="180" height="70" rx="6" fill="white" stroke="#e2e5ea"/>`;
+svg+=`<rect x="${lx+10}" y="${ly+10}" width="14" height="10" fill="#3b82f6" rx="2" opacity=".75"/><text x="${lx+30}" y="${ly+19}" font-size="10" fill="#2d3748">Upstream / Baseline</text>`;
+svg+=`<rect x="${lx+10}" y="${ly+28}" width="14" height="10" fill="${TCU}" rx="2" opacity=".75"/><text x="${lx+30}" y="${ly+37}" font-size="10" fill="#2d3748">Tributary</text>`;
+svg+=`<rect x="${lx+10}" y="${ly+46}" width="14" height="10" fill="#ea580c" rx="2" opacity=".75"/><text x="${lx+30}" y="${ly+55}" font-size="10" fill="#2d3748">Downstream / Integrator</text>`;
+svg+=`</svg>`;
+el.innerHTML=`<div class="fb"><h3>Site Concentration Chart</h3><button class="dlb" onclick="dlSvg('bsv','site_concentrations.svg')">⬇ SVG</button></div>${svg}`;}
+// RL/2 SCATTER (SVG)
+function rSn(el){
+const ss=RR.mi.siteStats,df=ss.map(s=>Math.abs(s.median-s.rl2)),pc=ss.map(s=>s.median>0?Math.abs(s.median-s.rl2)/s.median*100:0),rho=spR(ss.map(s=>s.median),ss.map(s=>s.rl2));
+const sorted=[...ss].sort((a,b)=>b.median-a.median),n=sorted.length;
+const rh=38,W=780,mt=72,mb=65,ml=130,mr=110,ph=n*rh,H=mt+ph+mb;
+const av=[...ss.map(s=>s.median),...ss.map(s=>s.rl2)].filter(v=>v>0);
+const nV=Math.min(...av)*.35,xV=Math.max(...av)*2.2;
+function tX(v){return ml+(Math.log10(Math.max(v,nV))-Math.log10(nV))/(Math.log10(xV)-Math.log10(nV))*(W-ml-mr);}
+let svg=`<svg id="rsv" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${W} ${H}" style="width:100%;max-height:${H+10}px;border-radius:8px"><rect width="${W}" height="${H}" fill="white"/>`;
+svg+=`<text x="${W/2}" y="24" text-anchor="middle" font-size="17" font-weight="bold" fill="${TCU}">Censoring Sensitivity: MI Median vs RL/2 Substitution</text>`;
+svg+=`<text x="${W/2}" y="44" text-anchor="middle" font-size="12" fill="#5f6b7a">Spearman \u03c1 = ${rho.toFixed(4)} | Longer bars = larger method disagreement</text>`;
+// Legend row between subtitle and data
+const lry=mt-12;
+svg+=`<circle cx="${ml+5}" cy="${lry}" r="6.5" fill="${TCU}" stroke="white" stroke-width="1.5"/>`;
+svg+=`<text x="${ml+18}" y="${lry+4}" font-size="11" font-weight="bold" fill="#2d3748">MI Median</text>`;
+svg+=`<circle cx="${ml+115}" cy="${lry}" r="5" fill="white" stroke="#8c95a5" stroke-width="2"/>`;
+svg+=`<text x="${ml+128}" y="${lry+4}" font-size="11" font-weight="bold" fill="#2d3748">RL/2</text>`;
+svg+=`<rect x="${ml+175}" y="${lry-5}" width="22" height="10" rx="3" fill="#e8d5f5"/>`;
+svg+=`<text x="${ml+203}" y="${lry+4}" font-size="11" font-weight="bold" fill="#2d3748">Gap</text>`;
+// Column headers on right
+svg+=`<text x="${W-mr+15}" y="${lry-2}" text-anchor="start" font-size="10" font-weight="bold" fill="${TCU}">% Diff</text>`;
+svg+=`<text x="${W-mr+60}" y="${lry-2}" text-anchor="start" font-size="10" font-weight="bold" fill="${TCU}">\u0394 ng/L</text>`;
+// X axis grid
+const ticks=[1,10,100,1000,10000,100000].filter(v=>v>=nV&&v<=xV);
+ticks.forEach(v=>{const x=tX(v);svg+=`<line x1="${x}" y1="${mt}" x2="${x}" y2="${mt+ph}" stroke="#e2e5ea" stroke-width=".6"/>`;svg+=`<text x="${x}" y="${mt+ph+20}" text-anchor="middle" font-size="12" font-weight="600" fill="#5f6b7a">${v>=1000?(v/1000)+'k':v}</text>`;});
+svg+=`<text x="${(ml+W-mr)/2}" y="${H-8}" text-anchor="middle" font-size="14" font-weight="bold" fill="#3f4a5a">\u03a3PFAS (ng/L, log scale)</text>`;
+// Data rows
+sorted.forEach((s,i)=>{
+const y=mt+i*rh+rh/2;
+if(i%2===0)svg+=`<rect x="${ml}" y="${y-rh/2}" width="${W-ml-mr}" height="${rh}" fill="${TCUL}" opacity=".25"/>`;
+const m=RR.si.find(d=>d['Site ID']===s.site_id);
+svg+=`<text x="${ml-8}" y="${y-2}" text-anchor="end" font-size="12" font-weight="bold" fill="${rc(m?.Bracket_role)}">${s.site_id}</text>`;
+svg+=`<text x="${ml-8}" y="${y+11}" text-anchor="end" font-size="9" fill="#8c95a5">${s.campaign.replace('Campaign ','C')}</text>`;
+const xMI=tX(s.median),xRL=tX(s.rl2);
+const xLo=Math.min(xMI,xRL),xHi=Math.max(xMI,xRL);
+const gapW=xHi-xLo;
+// Gap bar (colored by magnitude)
+const diff=s.median-s.rl2,absPct=s.median>0?Math.abs(diff)/s.median*100:0;
+const gapColor=absPct<0.5?'#d1fae5':absPct<2?'#e8d5f5':absPct<5?'#c084fc':'#9333ea';
+if(gapW>2){
+svg+=`<rect x="${xLo}" y="${y-6}" width="${gapW}" height="12" rx="6" fill="${gapColor}" opacity=".5"/>`;
+}
+// RL/2 dot (open circle, always visible)
+svg+=`<circle cx="${xRL}" cy="${y}" r="5.5" fill="white" stroke="#8c95a5" stroke-width="2.2"/>`;
+// MI dot (filled, on top)
+svg+=`<circle cx="${xMI}" cy="${y}" r="6.5" fill="${TCU}" stroke="white" stroke-width="1.5"/>`;
+// Right annotations
+const pctCol=absPct<1?'#16a34a':absPct<3?'#5f6b7a':'#9333ea';
+svg+=`<text x="${W-mr+15}" y="${y+4}" font-size="12" font-weight="bold" fill="${pctCol}">${F(absPct,1)}%</text>`;
+svg+=`<text x="${W-mr+60}" y="${y+4}" font-size="11" fill="#8c95a5">${F(Math.abs(diff),1)}</text>`;
+});
+svg+=`</svg>`;
+el.innerHTML=`<div class="fb"><h3>Censoring Sensitivity</h3><button class="dlb" onclick="dlSvg('rsv','MI_vs_RL2_sensitivity.svg')">\u2b07 SVG</button></div>${svg}<div style="margin-top:16px" class="g2"><div><h4>Summary Statistics</h4><div class="sc"><div class="sr"><span class="k">Spearman \u03c1</span><span class="v mono">${rho.toFixed(4)}</span></div><div class="sr"><span class="k">Max |MI\u2212RL/2|</span><span class="v mono">${F(Math.max(...df),3)} ng/L</span></div><div class="sr"><span class="k">Median |MI\u2212RL/2|</span><span class="v mono">${F(md(df),3)} ng/L</span></div><div class="sr"><span class="k">Max % difference</span><span class="v mono">${F(Math.max(...pc),2)}%</span></div><div class="sr"><span class="k">Rank preservation</span><span class="v">${rho>.99?'\u2713 Preserved':'\u26a0 Some rank changes'}</span></div></div></div><div><div class="nb nb-i"><b>How to read this chart:</b> Each row compares two ways of handling non-detected PFAS for the same sample. The <b style="color:${TCU}">filled purple dot</b> is the MI median (statistically rigorous); the <b style="color:#8c95a5">open gray circle</b> is the simpler RL/2 substitution. The <b>colored bar</b> between them shows the gap: <span style="color:#16a34a">\u25cf green</span> = negligible (<1%), <span style="color:#9333ea">\u25cf purple</span> = larger difference. Sites with many non-detects (low concentrations) show wider gaps because those have more values being imputed. Sites with mostly detections (high concentrations) show near-zero gaps because both methods use the same measured values. RL/2 substitution can introduce bias in censoring-heavy datasets (Helsel 2006 [4]).</div></div></div>`;}
+// DIAGNOSTICS
+function rD(el){const mi=RR.mi,nR=RR.nR;
+let cH='';mi.convergence.forEach(c=>{cH+=`<tr><td style="font-weight:600">${c.N.toLocaleString()}</td><td class="mono">${F(c.maxDiffMed,3)}</td><td class="mono">${F(c.maxDiffLo,3)}</td><td class="mono">${F(c.maxDiffHi,3)}</td></tr>`;});
+let pH='';mi.params.map((p,i)=>({...p,a:mi.analytes[i]})).sort((a,b)=>b.nDet-a.nDet).forEach(p=>{pH+=`<tr><td style="max-width:180px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap" title="${p.a}">${p.a}</td><td style="font-weight:600">${p.nDet}</td><td><span class="badge ${p.mode==='lognorm'?'b-ln':'b-un'}">${p.mode}</span></td><td class="mono">${p.mu!=null?F(p.mu,3):'\u2014'}</td><td class="mono">${p.sigma!=null?F(p.sigma,3):'\u2014'}</td></tr>`;});
+el.innerHTML=`<h3>Imputation Diagnostics</h3>
+<div class="g2"><div>
+<div class="diag-card"><strong>What is convergence?</strong><p>Tests whether the number of MI replicates is sufficient for stable inference (Rubin 1987 [2]). The table shows how much the median and interval endpoints change if you use fewer replicates vs. the full run. Smaller values = more stable results. Values below ~1 ng/L indicate the analysis has converged.</p></div>
+<h4>Convergence (max |difference| vs full N=${nR.toLocaleString()})</h4>
+<table><thead><tr><th>N subset</th><th>|\u0394 median|</th><th>|\u0394 II lower|</th><th>|\u0394 II upper|</th></tr></thead><tbody>${cH}</tbody></table>
+<h4 style="margin-top:16px">Analysis summary</h4><div class="sc">
+<div class="sr"><span class="k">Sites analyzed</span><span class="v">${new Set(mi.siteStats.map(s=>s.site_id)).size}</span></div>
+<div class="sr"><span class="k">Total samples</span><span class="v">${mi.nSamples}</span></div>
+<div class="sr"><span class="k">Analytes per sample</span><span class="v">${mi.nAnalytes}</span></div>
+<div class="sr"><span class="k">MI replicates</span><span class="v">${nR.toLocaleString()}</span></div>
+<div class="sr"><span class="k">Lognorm-fit analytes</span><span class="v">${mi.params.filter(p=>p.mode==='lognorm').length}</span></div>
+<div class="sr"><span class="k">Uniform-fit analytes</span><span class="v">${mi.params.filter(p=>p.mode==='uniform').length}</span></div>
+${RR.hr?`<div class="sr"><span class="k">Reach experiments</span><span class="v">${RR.re.length}</span></div>`:''}
+<div class="sr"><span class="k">Concentration range</span><span class="v">${F(Math.min(...mi.siteStats.map(s=>s.median)),0)}\u2013${F(Math.max(...mi.siteStats.map(s=>s.median)),0)} ng/L</span></div>
+</div></div><div>
+<div class="diag-card"><strong>What are these parameters?</strong><p><b>Lognorm:</b> Analytes with \u22652 detections — non-detects are imputed from a truncated lognormal distribution fit to detected values (Helsel 2012 [1]; Lubin et al. 2004 [3]). \u03bc and \u03c3 are the log-scale mean and standard deviation. <b>Uniform:</b> Analytes with <2 detections — non-detects are drawn uniformly between 0 and the reporting limit, avoiding unstable distributional assumptions (Antweiler &amp; Taylor 2008 [5]). More detections = more information = tighter imputation.</p></div>
+<h4>Analyte distribution parameters</h4><div class="sy"><table><thead><tr><th>Analyte</th><th>Det.</th><th>Mode</th><th>\u03bc(log)</th><th>\u03c3(log)</th></tr></thead><tbody>${pH}</tbody></table></div>
+</div></div>`;}
+// EXCEL
+function toXL(){if(!RR)return;const wb=XLSX.utils.book_new();const s1=RR.mi.siteStats.map(s=>{const m=RR.si.find(x=>x['Site ID']===s.site_id);return{Site:s.site_id,Reach_group:m?.Reach_group||'',Bracket_role:m?.Bracket_role||'',Campaign:s.campaign,MI_median:+s.median.toFixed(1),MI_p2_5:+s.lo.toFixed(1),MI_p97_5:+s.hi.toFixed(1),RL2:+s.rl2.toFixed(1),DetectOnly:+s.detectOnly.toFixed(1)};});XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(s1),'SiteTotals');if(RR.hr){const s2=RR.re.map(r=>({Experiment:r.experiment_id,Reach:r.reach_group,Type:r.experiment_type,Campaign:r.campaign,Delta_med:isNaN(r.deltaMed)?'':+r.deltaMed.toFixed(1),Delta_lo:isNaN(r.deltaLo)?'':+r.deltaLo.toFixed(1),Delta_hi:isNaN(r.deltaHi)?'':+r.deltaHi.toFixed(1),f_trib:isNaN(r.fMed)?'':+r.fMed.toFixed(4),Diagnostic:r.diagnostic}));XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(s2),'ReachExperiments');}const s3=RR.mi.siteStats.map(s=>({Site:s.site_id,Campaign:s.campaign,MI_median:+s.median.toFixed(2),RL2:+s.rl2.toFixed(2),Diff:+(s.median-s.rl2).toFixed(2),PctDiff:s.median>0?+((s.median-s.rl2)/s.median*100).toFixed(2):0}));XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(s3),'Sensitivity_RL2');const s4=RR.mi.convergence.map(c=>({N:c.N,MaxDiff_med:+c.maxDiffMed.toFixed(3),MaxDiff_lo:+c.maxDiffLo.toFixed(3),MaxDiff_hi:+c.maxDiffHi.toFixed(3)}));XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(s4),'Convergence');const s5=RR.mi.params.map((p,i)=>({Analyte:RR.mi.analytes[i],Detections:p.nDet,Mode:p.mode,mu_log:p.mu,sigma_log:p.sigma}));XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(s5),'ImputationParams');XLSX.writeFile(wb,'PFAS_Reach_Bracketing_Results.xlsx');}
+</script>
+</body>
+</html>

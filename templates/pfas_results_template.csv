@@ -1,0 +1,11 @@
+site_id,campaign,analyte_std,result_value,detect_flag,rl
+Site_A,Campaign 1,PFOS,22.5,1,2.0
+Site_A,Campaign 1,PFHxS,,0,2.0
+Site_A,Campaign 1,PFOA,3.8,1,2.0
+Site_A,Campaign 1,PFBS,,0,5.0
+Site_A,Campaign 1,6:2 FTS,,0,5.0
+Site_B,Campaign 1,PFOS,185.0,1,2.0
+Site_B,Campaign 1,PFHxS,92.0,1,2.0
+Site_B,Campaign 1,PFOA,28.0,1,2.0
+Site_B,Campaign 1,PFBS,12.0,1,5.0
+Site_B,Campaign 1,6:2 FTS,45.0,1,5.0
