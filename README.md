@@ -2,7 +2,7 @@
 
 **Machine-readable reach experiment analysis with censoring-aware multiple imputation for PFAS surface water networks.**
 
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.XXXXXXX.svg)](https://doi.org/10.5281/zenodo.XXXXXXX)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10.5281/zenodo.18937740.svg)](https://doi.org/10.5281/zenodo.10.5281/zenodo.18937740)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
 > **Live Tool:** [https://gkharel.github.io/pfas-reach-bracketing-tool/](https://gkharel.github.io/pfas-reach-bracketing-tool/)
