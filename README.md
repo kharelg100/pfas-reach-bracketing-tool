@@ -5,7 +5,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.10.5281/zenodo.18937740.svg)](https://doi.org/10.5281/zenodo.10.5281/zenodo.18937740)
 [![License: MIT](https://img.shields.io/badge/License-MIT-purple.svg)](LICENSE)
 
-> **Live Tool:** [https://gkharel.github.io/pfas-reach-bracketing-tool/](https://gkharel.github.io/pfas-reach-bracketing-tool/)
+> **Live Tool:** [https://gkharel.github.io/pfas-reach-bracketing-tool/](https://kharelg100.github.io/pfas-reach-bracketing-tool/)
 
 ---
 
