@@ -85,7 +85,7 @@ If you use this tool in your research, please cite:
                 analysis with multiple imputation}},
   year      = {2026},
   publisher = {Zenodo},
-  doi       = {10.5281/zenodo.XXXXXXX},
+  doi       = {10.5281/zenodo.18937740},
   url       = {https://github.com/gkharel/pfas-reach-bracketing-tool}
 }
 ```
