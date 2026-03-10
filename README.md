@@ -14,7 +14,7 @@
 An interactive, open-access browser-based tool that implements the machine-readable reach experiment framework for identifying PFAS sources in surface water networks. The tool performs censoring-aware multiple imputation (MI), computes reach-level concentration contrasts and tributary mixing fractions, evaluates sensitivity to censoring treatment (MI vs RL/2), and provides convergence diagnostics — all within the user's browser with no data uploaded to any server.
 
 **Associated manuscript:**  
-Kharel, G and Harvey, O. Machine-readable reach bracketing reveals persistent PFAS inputs from headwater tributaries. *ES&T Letters* (submitted 2026).
+Kharel, G and Harvey, O. Machine-readable reach bracketing reveals persistent PFAS inputs from headwater tributaries. (submitted 2026).
 
 ## Quick Start
 
