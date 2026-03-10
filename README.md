@@ -110,7 +110,7 @@ MIT License — see [LICENSE](LICENSE) for details.
 ## Contact
 
 **Dr. Gehendra Kharel**  
-Department of Environmental Sciences  
+Department of Environmental and Geological Sciences  
 Texas Christian University  
 Fort Worth, TX 76129, USA  
 📧 [g.kharel@tcu.edu](mailto:g.kharel@tcu.edu)
