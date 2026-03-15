@@ -1,5 +1,6 @@
 """
 PFAS Reach Bracketing Tool — Python Edition
+Author: Dr. Gehendra Kharel
 =============================================
 Machine-readable reach experiment analysis with multiple imputation.
 
