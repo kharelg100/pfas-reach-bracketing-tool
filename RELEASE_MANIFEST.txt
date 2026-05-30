@@ -1,0 +1,16 @@
+PFAS Reach Bracketing Tool v1.1.1 - ftrib visible fix
+
+Contents:
+- index.html: full styled GitHub Pages entry page
+- PFAS_Reach_Bracketing_Tool.html: intuitive local browser entry page
+- assets/pfas_reach_tool.js: browser analysis engine
+- data/: manuscript demo data and supplementary workbook
+- code/PFAS_Reach_Bracketing_Tool.py: companion Python edition
+- docs/: release and deployment notes
+- validation/: static and node validation reports
+
+Validation checks:
+- manuscript demo data runs in browser engine
+- summary cards include TW91, WF1 delta, and WF1 ftrib
+- ftrib badge spacing is fixed with a nonbreaking space
+- Reach Experiments tab explains f_trib columns and n/a behavior

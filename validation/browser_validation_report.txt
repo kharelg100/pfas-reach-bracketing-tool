@@ -1,0 +1,23 @@
+PFAS Reach Bracketing Tool validation report
+Generated: 2026-05-30T15:25:34.932Z
+Version: 1.1.1-browser-python-bundle
+MI replicates: 5000
+Random seed: 20260227
+Site-campaign samples: 20
+Unique sites: 15
+Reach-campaign output rows: 13
+Excluded rows outside site metadata: 40
+Spearman rho MI vs RL/2: 1.0000
+Max |MI - RL/2|: 0.736 ng L-1
+Convergence last N=2000: max |Δ median|=0.160 ng L-1
+Campaign 2 TW91 ΣPFAS40 median=15667.1 ng L-1
+WF1_FarmersBranch C2 ΔΣPFAS40=728.6 ng L-1; f_trib=0.047 [0.046, 0.048]; valid=1.00
+
+Input validation messages:
+- info: Excluded 40 PFAS rows from sites not present in site metadata.
+- info: Included PFAS rows: 800
+- info: Included site-campaign samples: 20
+- info: Included sites: 15
+- info: Included analytes: 40
+
+f_trib definition: apparent concentration-space tributary fraction under conservative two-endmember mixing; not a flow, source-apportionment, or load fraction.

@@ -1,0 +1,5 @@
+Static UI validation report
+- ftrib badge spacing uses &nbsp;: PASS
+- WF1 ftrib summary metric present: PASS
+- Reach table explanatory note present: PASS
+- GitHub links present: PASS
